@@ -8,6 +8,7 @@ const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel" });
 export const metadata: Metadata = {
   title: "DnD Character Generator",
   description: "Offline-first PWA for D&D 5e",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
