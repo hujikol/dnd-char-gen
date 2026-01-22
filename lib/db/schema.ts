@@ -1,0 +1,65 @@
+import Dexie, { Table } from 'dexie';
+
+export interface CharacterDB {
+  id?: number;
+  name: string;
+  class: string;
+  level: number;
+  data: any;
+}
+
+export interface ClassDB {
+  name: string;
+  hitDie: number;
+  primaryAbility: string;
+  data: any;
+}
+
+export interface RaceDB {
+  name: string;
+  data: any;
+}
+
+export interface SpellDB {
+  name: string;
+  level: number;
+  classes: string[];
+  data: any;
+}
+
+export interface EquipmentDB {
+  name: string;
+  type: string;
+  cost: string;
+  data: any;
+}
+
+export interface RollHistoryDB {
+  id?: number;
+  timestamp: number;
+  characterId?: number;
+  result: any;
+}
+
+export class DnDDatabase extends Dexie {
+  characters!: Table<CharacterDB, number>;
+  classes!: Table<ClassDB, string>;
+  races!: Table<RaceDB, string>;
+  spells!: Table<SpellDB, string>;
+  equipment!: Table<EquipmentDB, string>;
+  rollHistory!: Table<RollHistoryDB, number>;
+
+  constructor() {
+    super('DnDCharacterGenerator');
+    this.version(1).stores({
+      characters: '++id, name, class, level',
+      classes: 'name, hitDie, primaryAbility',
+      races: 'name',
+      spells: 'name, level, *classes',
+      equipment: 'name, type, cost',
+      rollHistory: '++id, timestamp, characterId'
+    });
+  }
+}
+
+export const db = new DnDDatabase();
