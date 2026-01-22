@@ -41,6 +41,11 @@ export interface RollHistoryDB {
   result: any;
 }
 
+export interface VersionDB {
+  id: string;
+  version: string;
+}
+
 export class DnDDatabase extends Dexie {
   characters!: Table<CharacterDB, number>;
   classes!: Table<ClassDB, string>;
@@ -48,6 +53,7 @@ export class DnDDatabase extends Dexie {
   spells!: Table<SpellDB, string>;
   equipment!: Table<EquipmentDB, string>;
   rollHistory!: Table<RollHistoryDB, number>;
+  versions!: Table<VersionDB, string>;
 
   constructor() {
     super('DnDCharacterGenerator');
@@ -57,7 +63,8 @@ export class DnDDatabase extends Dexie {
       races: 'name',
       spells: 'name, level, *classes',
       equipment: 'name, type, cost',
-      rollHistory: '++id, timestamp, characterId'
+      rollHistory: '++id, timestamp, characterId',
+      versions: 'id' 
     });
   }
 }

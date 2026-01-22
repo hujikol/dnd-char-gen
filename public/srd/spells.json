@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Acid Splash",
+        "level": 0,
+        "classes": [
+            "Sorcerer",
+            "Wizard"
+        ],
+        "data": {}
+    },
+    {
+        "name": "Mage Hand",
+        "level": 0,
+        "classes": [
+            "Bard",
+            "Sorcerer",
+            "Warlock",
+            "Wizard"
+        ],
+        "data": {}
+    }
+]

@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Club",
+        "type": "Weapon",
+        "cost": "1 sp",
+        "data": {}
+    },
+    {
+        "name": "Dagger",
+        "type": "Weapon",
+        "cost": "2 gp",
+        "data": {}
+    }
+]

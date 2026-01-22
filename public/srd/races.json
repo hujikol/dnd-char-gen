@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Dragonborn",
+        "data": {}
+    },
+    {
+        "name": "Dwarf",
+        "data": {}
+    },
+    {
+        "name": "Elf",
+        "data": {}
+    },
+    {
+        "name": "Gnome",
+        "data": {}
+    },
+    {
+        "name": "Half-Elf",
+        "data": {}
+    },
+    {
+        "name": "Half-Orc",
+        "data": {}
+    },
+    {
+        "name": "Halfling",
+        "data": {}
+    },
+    {
+        "name": "Human",
+        "data": {}
+    },
+    {
+        "name": "Tiefling",
+        "data": {}
+    }
+]

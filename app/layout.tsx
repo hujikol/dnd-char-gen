@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Cinzel } from "next/font/google";
+import { Inter, Cinzel } from "next/font/google"; // Add Cinzel
 import "./globals.css";
+import { SRDInitializer } from "@/components/srd-initializer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel" });
@@ -18,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cinzel.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${cinzel.variable} font-sans antialiased`}>
+        <SRDInitializer />
+        {children}
+      </body>
     </html>
   );
 }
