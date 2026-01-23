@@ -22,6 +22,8 @@ interface InventoryPanelProps {
 export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, onUpdateCurrency }: InventoryPanelProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<InventoryItem>>({ name: '', quantity: 1, weight: 0 });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterType, setFilterType] = useState<string>('all');
 
     const totalWeight = inventory?.reduce((sum, item) => sum + (item.weight * item.quantity), 0) || 0;
     const carryingCapacity = strengthScore * 15;
@@ -85,6 +87,30 @@ export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, o
                 </Button>
             </div>
 
+            <div className="flex gap-2">
+                <div className="relative flex-1">
+                    <Input
+                        placeholder="Search items..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-slate-900 border-slate-800"
+                    />
+                </div>
+                <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-[180px] bg-slate-900 border-slate-800">
+                        <SelectValue placeholder="Filter by..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Items</SelectItem>
+                        <SelectItem value="weapon">Weapons</SelectItem>
+                        <SelectItem value="armor">Armor</SelectItem>
+                        <SelectItem value="equipped">Equipped</SelectItem>
+                        <SelectItem value="attuned">Attuned</SelectItem>
+                        <SelectItem value="magic">Magic Items</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
             <div className="grid grid-cols-5 gap-2 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
                 {['cp', 'sp', 'ep', 'gp', 'pp'].map((coin) => (
                     <div key={coin} className="flex flex-col gap-1">
@@ -144,7 +170,16 @@ export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, o
                         </Button>
                     </div>
                 )}
-                {inventory?.map((item) => (
+                {inventory?.filter(item => {
+                    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        item.notes?.toLowerCase().includes(searchQuery.toLowerCase());
+                    const matchesFilter = filterType === 'all' ||
+                        (filterType === 'equipped' && item.equipped) ||
+                        (filterType === 'attuned' && item.attuned) ||
+                        (filterType === 'magic' && item.isMagic) ||
+                        item.type === filterType;
+                    return matchesSearch && matchesFilter;
+                }).map((item) => (
                     <Card key={item.id} className={`bg-slate-900 border-slate-800 ${item.equipped ? 'border-amber-500/50 ring-1 ring-amber-500/20' : ''}`}>
                         <CardContent className="p-3 flex items-center justify-between">
                             <div className="flex-1 min-w-0 mr-4">
