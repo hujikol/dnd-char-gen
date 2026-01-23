@@ -1,0 +1,190 @@
+import { useState } from 'react';
+import { InventoryItem } from '@/lib/stores/useCharacterStore';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Plus, Minus, Trash2, Package } from 'lucide-react';
+
+interface InventoryPanelProps {
+    inventory: InventoryItem[];
+    onUpdate: (inventory: InventoryItem[]) => void;
+}
+
+export function InventoryPanel({ inventory, onUpdate }: InventoryPanelProps) {
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [newItem, setNewItem] = useState<Partial<InventoryItem>>({ name: '', quantity: 1, weight: 0 });
+
+    const totalWeight = inventory?.reduce((sum, item) => sum + (item.weight * item.quantity), 0) || 0;
+
+    const handleAddItem = () => {
+        if (newItem.name) {
+            const itemToAdd: InventoryItem = {
+                id: crypto.randomUUID(),
+                name: newItem.name,
+                quantity: newItem.quantity || 1,
+                weight: newItem.weight || 0,
+                category: newItem.category || 'General',
+                notes: newItem.notes || ''
+            };
+
+            onUpdate([...(inventory || []), itemToAdd]);
+
+            setNewItem({ name: '', quantity: 1, weight: 0 });
+            setIsAddDialogOpen(false);
+        }
+    };
+
+    const handleUpdateItem = (itemId: string, updates: Partial<InventoryItem>) => {
+        if (!inventory) return;
+        const newInventory = inventory.map(item =>
+            item.id === itemId ? { ...item, ...updates } : item
+        );
+        onUpdate(newInventory);
+    };
+
+    const handleRemoveItem = (itemId: string) => {
+        if (!inventory) return;
+        onUpdate(inventory.filter(item => item.id !== itemId));
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <Package className="w-6 h-6" /> Inventory
+                </h2>
+                <Button onClick={() => setIsAddDialogOpen(true)} size="sm">
+                    <Plus className="w-4 h-4 mr-2" /> Add Item
+                </Button>
+            </div>
+
+            <div className="bg-slate-900/50 p-4 rounded-lg flex justify-between items-center border border-slate-800">
+                <span className="text-slate-400">Total Weight</span>
+                <span className="text-xl font-bold">{totalWeight.toFixed(1)} lbs</span>
+            </div>
+
+            <div className="grid gap-2">
+                {(!inventory || inventory.length === 0) && (
+                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-lg border border-dashed border-slate-800">
+                        <Package className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>Inventory is empty.</p>
+                        <Button variant="link" onClick={() => setIsAddDialogOpen(true)} className="text-amber-500">
+                            Add your first item
+                        </Button>
+                    </div>
+                )}
+                {inventory?.map((item) => (
+                    <Card key={item.id} className="bg-slate-900 border-slate-800">
+                        <CardContent className="p-3 flex items-center justify-between">
+                            <div className="flex-1 min-w-0 mr-4">
+                                <div className="font-medium truncate text-slate-200">{item.name}</div>
+                                <div className="text-xs text-slate-500">
+                                    {item.weight > 0 ? `${item.weight} lb` : '-'} {item.weight > 0 && item.quantity > 1 ? `(Total: ${(item.weight * item.quantity).toFixed(1)})` : ''}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center border border-slate-700 rounded-md bg-slate-950">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-r-none hover:bg-slate-800 text-slate-400"
+                                        onClick={() => {
+                                            if (item.quantity > 1) {
+                                                handleUpdateItem(item.id, { quantity: item.quantity - 1 });
+                                            } else {
+                                                handleRemoveItem(item.id);
+                                            }
+                                        }}
+                                    >
+                                        <Minus className="w-3 h-3" />
+                                    </Button>
+                                    <span className="w-8 text-center text-sm font-mono text-slate-300">{item.quantity}</span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 rounded-l-none hover:bg-slate-800 text-slate-400"
+                                        onClick={() => handleUpdateItem(item.id, { quantity: item.quantity + 1 })}
+                                    >
+                                        <Plus className="w-3 h-3" />
+                                    </Button>
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-500 hover:text-red-400 hover:bg-red-950/20"
+                                    onClick={() => handleRemoveItem(item.id)}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogContent className="bg-slate-950 border-slate-800 text-slate-200 sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add New Item</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="i-name">Item Name</Label>
+                            <Input
+                                id="i-name"
+                                value={newItem.name}
+                                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                                placeholder="e.g. Longsword"
+                                className="bg-slate-900 border-slate-800 focus:ring-amber-500"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="i-qty">Quantity</Label>
+                                <Input
+                                    id="i-qty"
+                                    type="number"
+                                    min="1"
+                                    value={newItem.quantity}
+                                    onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
+                                    className="bg-slate-900 border-slate-800 focus:ring-amber-500"
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="i-weight">Weight (lbs)</Label>
+                                <Input
+                                    id="i-weight"
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    value={newItem.weight}
+                                    onChange={(e) => setNewItem({ ...newItem, weight: parseFloat(e.target.value) || 0 })}
+                                    className="bg-slate-900 border-slate-800 focus:ring-amber-500"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="i-notes">Notes / Properties</Label>
+                            <Input
+                                id="i-notes"
+                                value={newItem.notes || ''}
+                                onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
+                                placeholder="e.g. Finesse, Versatile"
+                                className="bg-slate-900 border-slate-800 focus:ring-amber-500"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddItem} disabled={!newItem.name} className="bg-amber-600 hover:bg-amber-700 text-white">Add Item</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}

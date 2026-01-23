@@ -21,6 +21,7 @@ import { SpellList } from '../spells/SpellList';
 import { LongRestButton } from './RestButtons';
 import { ShortRestDialog } from './ShortRestDialog';
 import { Character } from '@/lib/stores/useCharacterStore';
+import { InventoryPanel } from './InventoryPanel';
 
 interface CharacterSheetProps {
     id: number;
@@ -137,10 +138,11 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
 
             {/* Main Content Grid */}
             <Tabs defaultValue="main" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsList className="grid w-full grid-cols-5 mb-6">
                     <TabsTrigger value="main">Main Sheet</TabsTrigger>
                     <TabsTrigger value="skills">Skills</TabsTrigger>
                     <TabsTrigger value="spells">Spells</TabsTrigger>
+                    <TabsTrigger value="inventory">Inventory</TabsTrigger>
                     <TabsTrigger value="features">Features</TabsTrigger>
                 </TabsList>
 
@@ -221,6 +223,13 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                             />
                         </div>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="inventory">
+                    <InventoryPanel
+                        inventory={character.data?.inventory || []}
+                        onUpdate={(newInventory) => handleUpdate({ inventory: newInventory })}
+                    />
                 </TabsContent>
 
                 <TabsContent value="features">

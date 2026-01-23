@@ -45,7 +45,17 @@ export interface Character {
     ritual?: boolean;
     source?: string; // e.g. "Create Bonfire" from SRD
   }[];
+  inventory: InventoryItem[];
   // Add other fields as needed
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  weight: number;
+  category?: string;
+  notes?: string;
 }
 
 interface CharacterState {
@@ -57,6 +67,11 @@ interface CharacterState {
   createCharacter: (character: Character) => void;
   performLongRest: () => void;
   initCharacter: () => void;
+  
+  // Inventory Actions
+  addItem: (item: Omit<InventoryItem, 'id'>) => void;
+  removeItem: (itemId: string) => void;
+  updateItem: (itemId: string, updates: Partial<InventoryItem>) => void;
 }
 
 const idbStorage = {
@@ -158,7 +173,36 @@ export const useCharacterStore = create<CharacterState>()(
             hp: { current: 10, max: 10, temp: 0 },
             hitDice: { current: 1, max: 1, die: "d8" },
             deathSaves: { successes: 0, failures: 0 },
+            inventory: [],
           };
+        }),
+
+      addItem: (item) =>
+        set((state) => {
+          if (state.character) {
+            if (!state.character.inventory) state.character.inventory = [];
+            state.character.inventory.push({
+                ...item,
+                id: crypto.randomUUID(),
+            });
+          }
+        }),
+
+      removeItem: (itemId) =>
+        set((state) => {
+          if (state.character && state.character.inventory) {
+            state.character.inventory = state.character.inventory.filter(i => i.id !== itemId);
+          }
+        }),
+
+      updateItem: (itemId, updates) =>
+        set((state) => {
+          if (state.character && state.character.inventory) {
+            const item = state.character.inventory.find(i => i.id === itemId);
+            if (item) {
+              Object.assign(item, updates);
+            }
+          }
         }),
     })),
     {
