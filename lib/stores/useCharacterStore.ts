@@ -56,6 +56,9 @@ export interface InventoryItem {
   weight: number;
   category?: string;
   notes?: string;
+  equipped?: boolean;
+  type?: 'weapon' | 'armor' | 'shield' | 'other';
+  properties?: any; // For AC, Damage, etc.
 }
 
 interface CharacterState {

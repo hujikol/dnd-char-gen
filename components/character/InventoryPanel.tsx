@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Plus, Minus, Trash2, Package, Scale } from 'lucide-react';
@@ -54,6 +56,10 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
         onUpdate(inventory.filter(item => item.id !== itemId));
     };
 
+    const toggleEquip = (item: InventoryItem) => {
+        handleUpdateItem(item.id, { equipped: !item.equipped });
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -94,16 +100,31 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                     </div>
                 )}
                 {inventory?.map((item) => (
-                    <Card key={item.id} className="bg-slate-900 border-slate-800">
+                    <Card key={item.id} className={`bg-slate-900 border-slate-800 ${item.equipped ? 'border-amber-500/50 ring-1 ring-amber-500/20' : ''}`}>
                         <CardContent className="p-3 flex items-center justify-between">
                             <div className="flex-1 min-w-0 mr-4">
-                                <div className="font-medium truncate text-slate-200">{item.name}</div>
-                                <div className="text-xs text-slate-500">
-                                    {item.weight > 0 ? `${item.weight} lb` : '-'} {item.weight > 0 && item.quantity > 1 ? `(Total: ${(item.weight * item.quantity).toFixed(1)})` : ''}
+                                <div className="flex items-center gap-2">
+                                    <div className="font-medium truncate text-slate-200">{item.name}</div>
+                                    {item.equipped && <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 text-[10px] h-5 px-1.5">Equipped</Badge>}
+                                </div>
+                                <div className="text-xs text-slate-500 flex items-center gap-2">
+                                    <span>{item.weight > 0 ? `${item.weight} lb` : '-'} {item.weight > 0 && item.quantity > 1 ? `(Total: ${(item.weight * item.quantity).toFixed(1)})` : ''}</span>
+                                    {item.type && <span className="text-slate-600">• {item.type}</span>}
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
+                                {['weapon', 'armor', 'shield'].includes(item.type || '') && (
+                                    <Button
+                                        variant={item.equipped ? "default" : "outline"}
+                                        size="sm"
+                                        className={`h-8 text-xs ${item.equipped ? 'bg-amber-600 hover:bg-amber-700' : 'text-slate-400 border-slate-700 hover:bg-slate-800'}`}
+                                        onClick={() => toggleEquip(item)}
+                                    >
+                                        {item.equipped ? 'Unequip' : 'Equip'}
+                                    </Button>
+                                )}
+
                                 <div className="flex items-center border border-slate-700 rounded-md bg-slate-950">
                                     <Button
                                         variant="ghost"
@@ -162,6 +183,23 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="i-type">Category</Label>
+                                <Select
+                                    value={newItem.type}
+                                    onValueChange={(val: any) => setNewItem({ ...newItem, type: val })}
+                                >
+                                    <SelectTrigger id="i-type" className="bg-slate-900 border-slate-800">
+                                        <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="weapon">Weapon</SelectItem>
+                                        <SelectItem value="armor">Armor</SelectItem>
+                                        <SelectItem value="shield">Shield</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="i-qty">Quantity</Label>
                                 <Input
