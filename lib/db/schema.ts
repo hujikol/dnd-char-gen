@@ -34,6 +34,11 @@ export interface EquipmentDB {
   data: any;
 }
 
+export interface BackgroundDB {
+  name: string;
+  data: any;
+}
+
 export interface RollHistoryDB {
   id?: number;
   timestamp: number;
@@ -50,6 +55,7 @@ export class DnDDatabase extends Dexie {
   characters!: Table<CharacterDB, number>;
   classes!: Table<ClassDB, string>;
   races!: Table<RaceDB, string>;
+  backgrounds!: Table<BackgroundDB, string>;
   spells!: Table<SpellDB, string>;
   equipment!: Table<EquipmentDB, string>;
   rollHistory!: Table<RollHistoryDB, number>;
@@ -65,6 +71,9 @@ export class DnDDatabase extends Dexie {
       equipment: 'name, type, cost',
       rollHistory: '++id, timestamp, characterId',
       versions: 'id' 
+    });
+    this.version(2).stores({
+      backgrounds: 'name'
     });
   }
 }

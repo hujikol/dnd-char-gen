@@ -1,4 +1,4 @@
-import { db, CharacterDB } from './schema';
+import { db, CharacterDB, RaceDB, ClassDB, BackgroundDB } from './schema';
 
 export const getAllCharacters = async (): Promise<CharacterDB[]> => {
   return await db.characters.toArray();
@@ -21,3 +21,15 @@ export const updateCharacter = async (id: number, updates: Partial<CharacterDB>)
 export const deleteCharacter = async (id: number): Promise<void> => {
     await db.characters.delete(id);
 }
+
+export const getAllRaces = async (): Promise<RaceDB[]> => {
+  return await db.races.toArray();
+};
+
+export const getAllClasses = async (): Promise<ClassDB[]> => {
+  return await db.classes.toArray();
+};
+
+export const getAllBackgrounds = async (): Promise<BackgroundDB[]> => {
+  return await db.backgrounds.toArray();
+};

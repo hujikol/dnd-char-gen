@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Acolyte",
+        "data": {
+            "skillProficiencies": [
+                "Insight",
+                "Religion"
+            ],
+            "languages": [
+                "Two of your choice"
+            ],
+            "equipment": [
+                "A holy symbol",
+                "a prayer book or wheel",
+                "5 sticks of incense",
+                "vestments",
+                "set of common clothes",
+                "15 gp"
+            ],
+            "feature": "Shelter of the Faithful",
+            "description": "You have spent your life in the service of a temple to a specific god or pantheon of gods."
+        }
+    }
+]

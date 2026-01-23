@@ -7,17 +7,21 @@ export interface Character {
   name: string;
   race: string;
   class: string;
+  background?: string;
   level: number;
-  stats: Record<string, number>;
+  abilityScores: Record<string, number>;
+  abilityScoreMethod: 'point-buy' | 'standard-array' | 'manual';
   // Add other fields as needed
 }
 
 interface CharacterState {
   character: Character | null;
   loadingState: 'idle' | 'loading' | 'error';
-  loadCharacter: () => Promise<void>;
+  loadCharacter: (id: number) => Promise<void>;
   updateCharacter: (updates: Partial<Character>) => void;
+  updateAbilityScore: (ability: string, value: number) => void;
   createCharacter: (character: Character) => void;
+  initCharacter: () => void;
 }
 
 const idbStorage = {
@@ -39,11 +43,17 @@ export const useCharacterStore = create<CharacterState>()(
       character: null,
       loadingState: 'idle',
 
-      loadCharacter: async () => {
+      loadCharacter: async (id: number) => {
         set((state) => { state.loadingState = 'loading'; });
         try {
-          // Simulation or logic here
-          set((state) => { state.loadingState = 'idle'; });
+          // Check if we have it in memory/storage first (via persist), handled by hydration
+          // But here we might want to reload from DB if strictly needed
+          // For now, let's assume persist middleware handles hydration of 'character'
+          // If we want to load a SPECIFIC id from IndexedDB into 'character', we can do:
+           // const char = await db.characters.get(id);
+           // if (char) set(state => { state.character = char; state.loadingState = 'idle' });
+           // But CharacterDB and Character types might differ slightly.
+           set((state) => { state.loadingState = 'idle'; });
         } catch (error) {
           set((state) => { state.loadingState = 'error'; });
         }
@@ -56,9 +66,28 @@ export const useCharacterStore = create<CharacterState>()(
           }
         }),
 
+      updateAbilityScore: (ability, value) =>
+        set((state) => {
+          if (state.character) {
+             state.character.abilityScores[ability] = value;
+          }
+        }),
+
       createCharacter: (character) =>
         set((state) => {
           state.character = character;
+        }),
+
+      initCharacter: () =>
+        set((state) => {
+          state.character = {
+            name: "New Character",
+            race: "",
+            class: "",
+            level: 1,
+            abilityScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
+            abilityScoreMethod: 'point-buy',
+          };
         }),
     })),
     {
