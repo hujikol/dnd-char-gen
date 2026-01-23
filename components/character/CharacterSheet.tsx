@@ -228,8 +228,13 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                 <TabsContent value="inventory">
                     <InventoryPanel
                         inventory={character.data?.inventory || []}
+                        currency={character.data?.currency || { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 }}
                         strengthScore={scores.str}
                         onUpdate={(newInventory) => handleUpdate({ inventory: newInventory })}
+                        onUpdateCurrency={(newCurrency) => {
+                            const currentCurrency = character.data?.currency || { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 };
+                            handleUpdate({ currency: { ...currentCurrency, ...newCurrency } });
+                        }}
                     />
                 </TabsContent>
 

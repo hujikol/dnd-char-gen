@@ -8,15 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Minus, Trash2, Package, Scale } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Minus, Trash2, Package, Scale, Sparkles, Link as LinkIcon } from 'lucide-react';
 
 interface InventoryPanelProps {
     inventory: InventoryItem[];
+    currency: { cp: number; sp: number; ep: number; gp: number; pp: number; };
     strengthScore: number;
     onUpdate: (inventory: InventoryItem[]) => void;
+    onUpdateCurrency: (currency: Partial<{ cp: number; sp: number; ep: number; gp: number; pp: number; }>) => void;
 }
 
-export function InventoryPanel({ inventory, strengthScore, onUpdate }: InventoryPanelProps) {
+export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, onUpdateCurrency }: InventoryPanelProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<InventoryItem>>({ name: '', quantity: 1, weight: 0 });
 
@@ -24,6 +27,9 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
     const carryingCapacity = strengthScore * 15;
     const isEncumbered = totalWeight > carryingCapacity;
     const percentage = Math.min(100, (totalWeight / carryingCapacity) * 100);
+
+    const attunedCount = inventory?.filter(i => i.attuned).length || 0;
+    const maxAttunement = 3;
 
     const handleAddItem = () => {
         if (newItem.name) {
@@ -33,7 +39,10 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                 quantity: newItem.quantity || 1,
                 weight: newItem.weight || 0,
                 category: newItem.category || 'General',
-                notes: newItem.notes || ''
+                notes: newItem.notes || '',
+                isMagic: newItem.isMagic || false,
+                requiresAttunement: newItem.requiresAttunement || false,
+                attuned: false,
             };
 
             onUpdate([...(inventory || []), itemToAdd]);
@@ -60,6 +69,11 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
         handleUpdateItem(item.id, { equipped: !item.equipped });
     };
 
+    const toggleAttune = (item: InventoryItem) => {
+        if (!item.attuned && attunedCount >= maxAttunement) return; // Prevent over-attunement
+        handleUpdateItem(item.id, { attuned: !item.attuned });
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -71,22 +85,53 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                 </Button>
             </div>
 
-            <div className="bg-slate-900/50 p-4 rounded-lg space-y-3 border border-slate-800">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-slate-400">
-                        <Scale className="w-4 h-4" />
-                        <span>Encumbrance</span>
+            <div className="grid grid-cols-5 gap-2 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                {['cp', 'sp', 'ep', 'gp', 'pp'].map((coin) => (
+                    <div key={coin} className="flex flex-col gap-1">
+                        <Label htmlFor={`coin-${coin}`} className="text-xs text-slate-500 uppercase text-center font-bold">{coin}</Label>
+                        <Input
+                            id={`coin-${coin}`}
+                            type="number"
+                            min="0"
+                            value={currency?.[coin as keyof typeof currency] || 0}
+                            onChange={(e) => onUpdateCurrency({ [coin]: parseInt(e.target.value) || 0 })}
+                            className="h-8 text-center bg-slate-950 border-slate-700 focus:ring-amber-500 px-1"
+                        />
                     </div>
-                    <span className={`text-sm font-bold ${isEncumbered ? 'text-red-400' : 'text-slate-200'}`}>
-                        {totalWeight.toFixed(1)} / {carryingCapacity} lbs
-                    </span>
+                ))}
+            </div>
+
+            <div className="flex gap-4">
+                <div className="flex-1 bg-slate-900/50 p-4 rounded-lg space-y-3 border border-slate-800">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <Scale className="w-4 h-4" />
+                            <span>Encumbrance</span>
+                        </div>
+                        <span className={`text-sm font-bold ${isEncumbered ? 'text-red-400' : 'text-slate-200'}`}>
+                            {totalWeight.toFixed(1)} / {carryingCapacity} lbs
+                        </span>
+                    </div>
+                    <Progress value={percentage} className={`h-2 ${isEncumbered ? 'bg-red-900/20' : ''}`} indicatorClassName={isEncumbered ? 'bg-red-500' : 'bg-amber-500'} />
+                    {isEncumbered && (
+                        <div className="text-xs text-red-400 font-medium text-center">
+                            Speed drops to 5 ft.
+                        </div>
+                    )}
                 </div>
-                <Progress value={percentage} className={`h-2 ${isEncumbered ? 'bg-red-900/20' : ''}`} indicatorClassName={isEncumbered ? 'bg-red-500' : 'bg-amber-500'} />
-                {isEncumbered && (
-                    <div className="text-xs text-red-400 font-medium text-center">
-                        Over Encumbered - Speed drops to 5 ft.
+
+                <div className="bg-slate-900/50 p-4 rounded-lg space-y-3 border border-slate-800 w-1/3">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <LinkIcon className="w-4 h-4" />
+                            <span>Attunement</span>
+                        </div>
+                        <span className={`text-sm font-bold ${attunedCount > maxAttunement ? 'text-red-400' : 'text-slate-200'}`}>
+                            {attunedCount} / {maxAttunement}
+                        </span>
                     </div>
-                )}
+                    <Progress value={(attunedCount / maxAttunement) * 100} className="h-2" indicatorClassName="bg-purple-500" />
+                </div>
             </div>
 
             <div className="grid gap-2">
@@ -103,13 +148,18 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                     <Card key={item.id} className={`bg-slate-900 border-slate-800 ${item.equipped ? 'border-amber-500/50 ring-1 ring-amber-500/20' : ''}`}>
                         <CardContent className="p-3 flex items-center justify-between">
                             <div className="flex-1 min-w-0 mr-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="font-medium truncate text-slate-200">{item.name}</div>
+                                <div className="font-medium truncate text-slate-200 flex items-center gap-2">
+                                    {item.name}
+                                    {item.isMagic && <Sparkles className="w-3 h-3 text-purple-400" />}
+                                </div>
+                                <div className="flex gap-1">
                                     {item.equipped && <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 text-[10px] h-5 px-1.5">Equipped</Badge>}
+                                    {item.attuned && <Badge variant="secondary" className="bg-purple-500/10 text-purple-400 text-[10px] h-5 px-1.5">Attuned</Badge>}
                                 </div>
                                 <div className="text-xs text-slate-500 flex items-center gap-2">
                                     <span>{item.weight > 0 ? `${item.weight} lb` : '-'} {item.weight > 0 && item.quantity > 1 ? `(Total: ${(item.weight * item.quantity).toFixed(1)})` : ''}</span>
                                     {item.type && <span className="text-slate-600">• {item.type}</span>}
+                                    {item.requiresAttunement && <span className="text-purple-500/70 italic">• Requires Attunement</span>}
                                 </div>
                             </div>
 
@@ -122,6 +172,19 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                                         onClick={() => toggleEquip(item)}
                                     >
                                         {item.equipped ? 'Unequip' : 'Equip'}
+                                    </Button>
+                                )}
+
+                                {item.requiresAttunement && (
+                                    <Button
+                                        variant={item.attuned ? "default" : "outline"}
+                                        size="sm"
+                                        className={`h-8 text-xs ${item.attuned ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-400 border-purple-900/50 hover:bg-purple-900/20'}`}
+                                        onClick={() => toggleAttune(item)}
+                                        disabled={!item.attuned && attunedCount >= maxAttunement}
+                                    >
+                                        <LinkIcon className="w-3 h-3 mr-1" />
+                                        {item.attuned ? 'Attuned' : 'Attune'}
                                     </Button>
                                 )}
 
@@ -162,7 +225,8 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                             </div>
                         </CardContent>
                     </Card>
-                ))}
+                ))
+                }
             </div>
 
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -234,6 +298,24 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                                 className="bg-slate-900 border-slate-800 focus:ring-amber-500"
                             />
                         </div>
+                        <div className="flex items-center gap-4 pt-2">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="i-magic"
+                                    checked={newItem.isMagic || false}
+                                    onCheckedChange={(checked) => setNewItem({ ...newItem, isMagic: checked })}
+                                />
+                                <Label htmlFor="i-magic">Magic Item</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="i-attune"
+                                    checked={newItem.requiresAttunement || false}
+                                    onCheckedChange={(checked) => setNewItem({ ...newItem, requiresAttunement: checked })}
+                                />
+                                <Label htmlFor="i-attune">Requires Attunement</Label>
+                            </div>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
@@ -241,6 +323,6 @@ export function InventoryPanel({ inventory, strengthScore, onUpdate }: Inventory
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

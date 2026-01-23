@@ -46,6 +46,13 @@ export interface Character {
     source?: string; // e.g. "Create Bonfire" from SRD
   }[];
   inventory: InventoryItem[];
+  currency: {
+    cp: number;
+    sp: number;
+    ep: number;
+    gp: number;
+    pp: number;
+  };
   // Add other fields as needed
 }
 
@@ -59,6 +66,9 @@ export interface InventoryItem {
   equipped?: boolean;
   type?: 'weapon' | 'armor' | 'shield' | 'other';
   properties?: any; // For AC, Damage, etc.
+  isMagic?: boolean;
+  requiresAttunement?: boolean;
+  attuned?: boolean;
 }
 
 interface CharacterState {
@@ -75,6 +85,7 @@ interface CharacterState {
   addItem: (item: Omit<InventoryItem, 'id'>) => void;
   removeItem: (itemId: string) => void;
   updateItem: (itemId: string, updates: Partial<InventoryItem>) => void;
+  updateCurrency: (currency: Partial<Character['currency']>) => void;
 }
 
 const idbStorage = {
@@ -177,7 +188,15 @@ export const useCharacterStore = create<CharacterState>()(
             hitDice: { current: 1, max: 1, die: "d8" },
             deathSaves: { successes: 0, failures: 0 },
             inventory: [],
+            currency: { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 },
           };
+        }),
+
+      updateCurrency: (currency) =>
+        set((state) => {
+          if (state.character) {
+             Object.assign(state.character.currency, currency);
+          }
         }),
 
       addItem: (item) =>
