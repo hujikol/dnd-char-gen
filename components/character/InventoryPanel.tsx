@@ -4,19 +4,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Minus, Trash2, Package } from 'lucide-react';
+import { Plus, Minus, Trash2, Package, Scale } from 'lucide-react';
 
 interface InventoryPanelProps {
     inventory: InventoryItem[];
+    strengthScore: number;
     onUpdate: (inventory: InventoryItem[]) => void;
 }
 
-export function InventoryPanel({ inventory, onUpdate }: InventoryPanelProps) {
+export function InventoryPanel({ inventory, strengthScore, onUpdate }: InventoryPanelProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<InventoryItem>>({ name: '', quantity: 1, weight: 0 });
 
     const totalWeight = inventory?.reduce((sum, item) => sum + (item.weight * item.quantity), 0) || 0;
+    const carryingCapacity = strengthScore * 15;
+    const isEncumbered = totalWeight > carryingCapacity;
+    const percentage = Math.min(100, (totalWeight / carryingCapacity) * 100);
 
     const handleAddItem = () => {
         if (newItem.name) {
@@ -60,9 +65,22 @@ export function InventoryPanel({ inventory, onUpdate }: InventoryPanelProps) {
                 </Button>
             </div>
 
-            <div className="bg-slate-900/50 p-4 rounded-lg flex justify-between items-center border border-slate-800">
-                <span className="text-slate-400">Total Weight</span>
-                <span className="text-xl font-bold">{totalWeight.toFixed(1)} lbs</span>
+            <div className="bg-slate-900/50 p-4 rounded-lg space-y-3 border border-slate-800">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-slate-400">
+                        <Scale className="w-4 h-4" />
+                        <span>Encumbrance</span>
+                    </div>
+                    <span className={`text-sm font-bold ${isEncumbered ? 'text-red-400' : 'text-slate-200'}`}>
+                        {totalWeight.toFixed(1)} / {carryingCapacity} lbs
+                    </span>
+                </div>
+                <Progress value={percentage} className={`h-2 ${isEncumbered ? 'bg-red-900/20' : ''}`} indicatorClassName={isEncumbered ? 'bg-red-500' : 'bg-amber-500'} />
+                {isEncumbered && (
+                    <div className="text-xs text-red-400 font-medium text-center">
+                        Over Encumbered - Speed drops to 5 ft.
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-2">

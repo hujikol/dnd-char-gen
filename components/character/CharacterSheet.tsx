@@ -228,6 +228,7 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                 <TabsContent value="inventory">
                     <InventoryPanel
                         inventory={character.data?.inventory || []}
+                        strengthScore={scores.str}
                         onUpdate={(newInventory) => handleUpdate({ inventory: newInventory })}
                     />
                 </TabsContent>
