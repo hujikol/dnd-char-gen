@@ -33,7 +33,7 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-xl font-heading font-medium mb-2">No Characters Found</h3>
                     <p className="text-muted-foreground text-center max-w-sm mb-6">
-                        You haven't created any characters yet. Start your adventure by creating your first character.
+                        You haven&apos;t created any characters yet. Start your adventure by creating your first character.
                     </p>
                     <Link href="/character/new">
                         <Button size="lg" className="gap-2">

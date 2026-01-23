@@ -20,7 +20,8 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
 
     // Type assertion or safe access since database schema 'data' is any.
     // Ideally, use a Zod schema to parse 'data'. For now, manual access.
-    const { race, background } = character;
+    const race = character.data?.race || '';
+    const background = character.data?.background || '';
     const abilityScores = character.data?.abilityScores || character.data?.stats || {};
     const description = character.data?.description || "";
 
