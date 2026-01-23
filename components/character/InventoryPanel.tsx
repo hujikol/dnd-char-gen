@@ -104,6 +104,8 @@ export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, o
                         <SelectItem value="all">All Items</SelectItem>
                         <SelectItem value="weapon">Weapons</SelectItem>
                         <SelectItem value="armor">Armor</SelectItem>
+                        <SelectItem value="shield">Shields</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                         <SelectItem value="equipped">Equipped</SelectItem>
                         <SelectItem value="attuned">Attuned</SelectItem>
                         <SelectItem value="magic">Magic Items</SelectItem>
