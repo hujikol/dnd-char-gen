@@ -11,6 +11,39 @@ export interface Character {
   level: number;
   abilityScores: Record<string, number>;
   abilityScoreMethod: 'point-buy' | 'standard-array' | 'manual';
+  hp: {
+    current: number;
+    max: number;
+    temp: number;
+  };
+  hitDice: {
+    current: number;
+    max: number;
+    die: string; // e.g. "d8", "d10"
+  };
+  deathSaves: {
+    successes: number;
+    failures: number;
+  };
+  attacks?: {
+    id: string;
+    name: string;
+    bonus: number;
+    damage: string;
+    type: string;
+  }[];
+  skillProficiencies?: string[]; // List of skill names that are proficient
+  savingThrowProficiencies?: string[]; // List of ability keys (str, dex, etc.)
+  initiative?: number;
+  spellSlots?: Record<number, { max: number; current: number }>;
+  pactSlots?: { max: number; current: number; level: number };
+  spells?: {
+    name: string;
+    level: number;
+    school?: string;
+    prepared?: boolean;
+    source?: string; // e.g. "Create Bonfire" from SRD
+  }[];
   // Add other fields as needed
 }
 
@@ -87,6 +120,9 @@ export const useCharacterStore = create<CharacterState>()(
             level: 1,
             abilityScores: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
             abilityScoreMethod: 'point-buy',
+            hp: { current: 10, max: 10, temp: 0 },
+            hitDice: { current: 1, max: 1, die: "d8" },
+            deathSaves: { successes: 0, failures: 0 },
           };
         }),
     })),

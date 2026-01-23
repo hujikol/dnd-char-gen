@@ -28,6 +28,8 @@ describe('CharacterSheet', () => {
             background: "Soldier",
             level: 3,
             data: {
+                race: "Dwarf",
+                background: "Soldier",
                 abilityScores: { str: 16, dex: 12, con: 14, int: 8, wis: 10, cha: 8 }
             }
         };
@@ -38,8 +40,8 @@ describe('CharacterSheet', () => {
 
         expect(screen.getByText("Gimli")).toBeInTheDocument();
         expect(screen.getByText(/Level 3 Fighter/)).toBeInTheDocument();
-        expect(screen.getByText("Dwarf")).toBeInTheDocument();
-        expect(screen.getByText("Soldier")).toBeInTheDocument();
+        expect(screen.getByText(/Dwarf/)).toBeInTheDocument();
+        expect(screen.getByText(/Soldier/)).toBeInTheDocument();
 
         // Ability Scores rendering
         expect(screen.getByText("16")).toBeInTheDocument(); // STR

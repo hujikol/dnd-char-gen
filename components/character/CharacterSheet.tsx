@@ -7,6 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { calculateModifier } from '@/lib/utils/calculate-modifier';
 import Link from 'next/link';
+import { VitalityTracker } from './VitalityTracker';
+import { AttackList } from '../combat/AttackList';
+import { SkillList } from './SkillList';
+import { SavingThrowList } from './SavingThrowList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { RollHistoryList } from '../dice/RollHistoryList';
+import { History } from 'lucide-react';
+import { InitiativeTracker } from '../combat/InitiativeTracker';
+import { SpellSlotTracker } from '../spells/SpellSlotTracker';
+import { SpellList } from '../spells/SpellList';
 
 interface CharacterSheetProps {
     id: number;
@@ -35,6 +46,29 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
         cha: abilityScores.cha ?? 10,
     }
 
+    const hp = character.data?.hp || {
+        current: 10 + calculateModifier(scores.con),
+        max: 10 + calculateModifier(scores.con),
+        temp: 0
+    };
+
+    const hitDice = character.data?.hitDice || {
+        current: character.level,
+        max: character.level,
+        die: "d8" // Default fallback
+    };
+
+    const deathSaves = character.data?.deathSaves || { successes: 0, failures: 0 };
+    const attacks = character.data?.attacks || [];
+    const skillProficiencies = character.data?.skillProficiencies || [];
+
+    // Level 1-4: +2, 5-8: +3 ... simple formula: floor((level-1)/4) + 2
+    const proficiencyBonus = Math.floor((character.level - 1) / 4) + 2;
+
+    const handleUpdate = (updates: any) => {
+        db.characters.update(id, { data: { ...character.data, ...updates } });
+    };
+
     return (
         <div className="space-y-6 pb-24">
             {/* Header */}
@@ -49,9 +83,26 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                         <span>{background}</span>
                     </div>
                 </div>
-                <Link href="/dashboard">
-                    <Button variant="outline">Close</Button>
-                </Link>
+                <div className="flex gap-2">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" size="icon">
+                                <History className="h-4 w-4" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                            <SheetHeader>
+                                <SheetTitle>Roll History</SheetTitle>
+                            </SheetHeader>
+                            <div className="h-[calc(100vh-8rem)] mt-4">
+                                <RollHistoryList />
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                    <Link href="/dashboard">
+                        <Button variant="outline">Close</Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Ability Scores */}
@@ -73,26 +124,116 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                 })}
             </div>
 
-            {/* Features Placeholder */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="h-full">
-                    <CardHeader>
-                        <CardTitle className="font-heading">Class Features</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground italic">No features yet.</p>
-                    </CardContent>
-                </Card>
+            {/* Main Content Grid */}
+            <Tabs defaultValue="main" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 mb-6">
+                    <TabsTrigger value="main">Main Sheet</TabsTrigger>
+                    <TabsTrigger value="skills">Skills</TabsTrigger>
+                    <TabsTrigger value="spells">Spells</TabsTrigger>
+                    <TabsTrigger value="features">Features</TabsTrigger>
+                </TabsList>
 
-                <Card className="h-full">
-                    <CardHeader>
-                        <CardTitle className="font-heading">Proficiencies</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground italic">No proficiencies yet.</p>
-                    </CardContent>
-                </Card>
-            </div>
+                <TabsContent value="main" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Left Column: Vitals */}
+                        <div className="md:col-span-1 space-y-6">
+                            <VitalityTracker
+                                hp={hp}
+                                hitDice={hitDice}
+                                deathSaves={deathSaves}
+                                onUpdate={handleUpdate}
+                            />
+                            <SavingThrowList
+                                abilityScores={scores}
+                                proficiencyBonus={proficiencyBonus}
+                                proficiencies={character.data?.savingThrowProficiencies || []}
+                                onUpdate={(newSaves) => handleUpdate({ savingThrowProficiencies: newSaves })}
+                                characterId={id}
+                            />
+                        </div>
+
+                        {/* Right Column: Combat */}
+                        <div className="md:col-span-2 space-y-6">
+                            <InitiativeTracker
+                                dexScore={scores.dex}
+                                initiative={character.data?.initiative}
+                                onUpdate={(val) => handleUpdate({ initiative: val })}
+                                characterId={id}
+                            />
+                            <AttackList
+                                attacks={attacks}
+                                characterId={id}
+                                onUpdate={(newAttacks) => handleUpdate({ attacks: newAttacks })}
+                            />
+                        </div>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="skills">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <SkillList
+                            abilityScores={scores}
+                            proficiencyBonus={proficiencyBonus}
+                            proficiencies={skillProficiencies}
+                            onUpdate={(newSkills) => handleUpdate({ skillProficiencies: newSkills })}
+                            characterId={id}
+                        />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="spells">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1">
+                            <SpellSlotTracker
+                                slots={character.data?.spellSlots || {}}
+                                pactSlots={character.data?.pactSlots}
+                                onUpdate={(slots, pact) => handleUpdate({ spellSlots: slots, pactSlots: pact })}
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <SpellList
+                                spells={character.data?.spells || []}
+                                slots={character.data?.spellSlots || {}}
+                                onConsumeSlot={(level) => {
+                                    const slots = character.data?.spellSlots || {};
+                                    const currentSlot = slots[level] || { max: 0, current: 0 };
+                                    if (currentSlot.current > 0) {
+                                        handleUpdate({
+                                            spellSlots: {
+                                                ...slots,
+                                                [level]: { ...currentSlot, current: currentSlot.current - 1 }
+                                            }
+                                        });
+                                    }
+                                }}
+                                onUpdate={(newSpells) => handleUpdate({ spells: newSpells })}
+                            />
+                        </div>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="features">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="h-full">
+                            <CardHeader>
+                                <CardTitle className="font-heading">Class Features</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground italic">No features yet.</p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="h-full">
+                            <CardHeader>
+                                <CardTitle className="font-heading">Proficiencies</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground italic">No proficiencies yet.</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
