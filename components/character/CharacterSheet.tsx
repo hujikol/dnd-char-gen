@@ -18,6 +18,9 @@ import { History } from 'lucide-react';
 import { InitiativeTracker } from '../combat/InitiativeTracker';
 import { SpellSlotTracker } from '../spells/SpellSlotTracker';
 import { SpellList } from '../spells/SpellList';
+import { LongRestButton } from './RestButtons';
+import { ShortRestDialog } from './ShortRestDialog';
+import { Character } from '@/lib/stores/useCharacterStore';
 
 interface CharacterSheetProps {
     id: number;
@@ -84,6 +87,14 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <ShortRestDialog
+                        character={character.data as Character}
+                        onUpdate={handleUpdate}
+                    />
+                    <LongRestButton
+                        characterData={character.data as Character}
+                        onUpdate={handleUpdate}
+                    />
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="outline" size="icon">

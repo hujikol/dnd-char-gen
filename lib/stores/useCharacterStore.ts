@@ -42,6 +42,7 @@ export interface Character {
     level: number;
     school?: string;
     prepared?: boolean;
+    ritual?: boolean;
     source?: string; // e.g. "Create Bonfire" from SRD
   }[];
   // Add other fields as needed
@@ -54,6 +55,7 @@ interface CharacterState {
   updateCharacter: (updates: Partial<Character>) => void;
   updateAbilityScore: (ability: string, value: number) => void;
   createCharacter: (character: Character) => void;
+  performLongRest: () => void;
   initCharacter: () => void;
 }
 
@@ -109,6 +111,39 @@ export const useCharacterStore = create<CharacterState>()(
       createCharacter: (character) =>
         set((state) => {
           state.character = character;
+        }),
+
+      performLongRest: () =>
+        set((state) => {
+          if (state.character) {
+            // Restore HP
+            state.character.hp.current = state.character.hp.max;
+            state.character.hp.temp = 0;
+
+            // Reset Death Saves
+            state.character.deathSaves.successes = 0;
+            state.character.deathSaves.failures = 0;
+
+            // Recover Hit Dice (up to half of max, min 1)
+            const hitDiceMax = state.character.hitDice.max;
+            const recoverAmount = Math.max(1, Math.floor(hitDiceMax / 2));
+            state.character.hitDice.current = Math.min(
+                hitDiceMax,
+                state.character.hitDice.current + recoverAmount
+            );
+
+            // Restore Spell Slots
+            if (state.character.spellSlots) {
+                Object.values(state.character.spellSlots).forEach(slot => {
+                    slot.current = slot.max;
+                });
+            }
+            
+            // Restore Pact Slots
+            if (state.character.pactSlots) {
+                state.character.pactSlots.current = state.character.pactSlots.max;
+            }
+          }
         }),
 
       initCharacter: () =>

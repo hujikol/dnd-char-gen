@@ -124,6 +124,9 @@ export function SpellList({ spells = [], slots = {}, onConsumeSlot, onUpdate }: 
                                                     </div>
                                                 }
                                             />
+                                            {spell.ritual && (
+                                                <Badge variant="secondary" className="text-[10px] h-4 px-1 rounded-sm" title="Ritual">R</Badge>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center gap-2">

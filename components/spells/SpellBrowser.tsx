@@ -37,6 +37,7 @@ export function SpellBrowser({ onAddSpell, knownSpells }: SpellBrowserProps) {
             name: spell.name,
             level: spell.level,
             school: spell.school || "Unknown",
+            ritual: spell.data?.ritual || false,
             source: "SRD"
         });
         setIsOpen(false);

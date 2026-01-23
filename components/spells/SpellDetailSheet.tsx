@@ -28,6 +28,12 @@ export function SpellDetailSheet({ spellName, trigger }: SpellDetailSheetProps) 
                             <span>Level {spell.level}</span>
                             <span>•</span>
                             <span>{spell.data?.school || "Unknown School"}</span>
+                            {spell.data?.ritual && (
+                                <>
+                                    <span>•</span>
+                                    <span className="font-bold text-primary">Ritual</span>
+                                </>
+                            )}
                         </div>
                     )}
                 </SheetHeader>
