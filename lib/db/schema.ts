@@ -51,6 +51,11 @@ export interface VersionDB {
   version: string;
 }
 
+export interface ConditionDB {
+  name: string;
+  data: any;
+}
+
 export class DnDDatabase extends Dexie {
   characters!: Table<CharacterDB, number>;
   classes!: Table<ClassDB, string>;
@@ -58,6 +63,7 @@ export class DnDDatabase extends Dexie {
   backgrounds!: Table<BackgroundDB, string>;
   spells!: Table<SpellDB, string>;
   equipment!: Table<EquipmentDB, string>;
+  conditions!: Table<ConditionDB, string>;
   rollHistory!: Table<RollHistoryDB, number>;
   versions!: Table<VersionDB, string>;
 
@@ -75,7 +81,11 @@ export class DnDDatabase extends Dexie {
     this.version(2).stores({
       backgrounds: 'name'
     });
+    this.version(3).stores({
+      conditions: 'name'
+    });
   }
 }
+
 
 export const db = new DnDDatabase();

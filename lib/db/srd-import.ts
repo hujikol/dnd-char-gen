@@ -14,26 +14,29 @@ export const initializeSRD = async () => {
 
     console.log("SRD Update detected or first run. Importing...");
 
-    const [classes, races, spells, equipment, backgrounds] = await Promise.all([
+    const [classes, races, spells, equipment, backgrounds, conditions] = await Promise.all([
       fetch('/srd/classes.json').then(r => r.json()),
       fetch('/srd/races.json').then(r => r.json()),
       fetch('/srd/spells.json').then(r => r.json()),
       fetch('/srd/equipment.json').then(r => r.json()),
       fetch('/srd/backgrounds.json').then(r => r.json()),
+      fetch('/srd/conditions.json').then(r => r.json()),
     ]);
 
-    await db.transaction('rw', [db.classes, db.races, db.spells, db.equipment, db.backgrounds, db.versions], async () => {
+    await db.transaction('rw', [db.classes, db.races, db.spells, db.equipment, db.backgrounds, db.conditions, db.versions], async () => {
       await db.classes.clear();
       await db.races.clear();
       await db.spells.clear();
       await db.equipment.clear();
       await db.backgrounds.clear();
+      await db.conditions.clear();
 
       await db.classes.bulkPut(classes);
       await db.races.bulkPut(races);
       await db.spells.bulkPut(spells);
       await db.equipment.bulkPut(equipment);
       await db.backgrounds.bulkPut(backgrounds);
+      await db.conditions.bulkPut(conditions);
 
       await db.versions.put({ id: 'current', version: versionData.version });
     });

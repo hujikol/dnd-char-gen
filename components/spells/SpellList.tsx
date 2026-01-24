@@ -12,7 +12,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CastSpellDialog } from './CastSpellDialog';
 import { toast } from 'sonner';
-import { SpellDetailSheet } from './SpellDetailSheet';
+// import { SpellDetailSheet } from './SpellDetailSheet';
+import { WikiLink } from '@/components/wiki/WikiLink';
 
 interface SpellListProps {
     spells: Character['spells'];
@@ -116,14 +117,13 @@ export function SpellList({ spells = [], slots = {}, onConsumeSlot, onUpdate }: 
                                                 </div>
                                             )}
 
-                                            <SpellDetailSheet
-                                                spellName={spell.name}
-                                                trigger={
-                                                    <div className={cn("font-medium cursor-pointer hover:underline", !isActive && "text-muted-foreground")}>
-                                                        {spell.name}
-                                                    </div>
-                                                }
-                                            />
+                                            <WikiLink
+                                                type="spell"
+                                                entity={spell.name}
+                                                className={cn("font-medium", !isActive && "text-muted-foreground")}
+                                            >
+                                                {spell.name}
+                                            </WikiLink>
                                             {spell.ritual && (
                                                 <Badge variant="secondary" className="text-[10px] h-4 px-1 rounded-sm" title="Ritual">R</Badge>
                                             )}
@@ -159,14 +159,15 @@ export function SpellList({ spells = [], slots = {}, onConsumeSlot, onUpdate }: 
                                                 )}
                                             </div>
 
-                                            <SpellDetailSheet
-                                                spellName={spell.name}
-                                                trigger={
-                                                    <Badge variant="outline" className="text-[10px] h-5 opacity-50 group-hover:opacity-100 cursor-pointer hover:bg-secondary">
-                                                        Details
-                                                    </Badge>
-                                                }
-                                            />
+                                            <WikiLink
+                                                type="spell"
+                                                entity={spell.name}
+                                                className="no-underline"
+                                            >
+                                                <Badge variant="outline" className="text-[10px] h-5 opacity-50 group-hover:opacity-100 cursor-pointer hover:bg-secondary">
+                                                    Details
+                                                </Badge>
+                                            </WikiLink>
 
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleRemoveSpell(spell.name); }}

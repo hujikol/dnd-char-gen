@@ -4,6 +4,9 @@ import "./globals.css";
 import { SRDInitializer } from "@/components/srd-initializer";
 import { DiceBox } from "@/components/dice/DiceBox";
 import { Toaster } from "@/components/ui/sonner";
+import { GlobalCommand } from "@/components/global-command";
+import { ThemeProvider } from "@/components/theme-provider";
+import { WikiSlideOver } from "@/components/wiki/WikiSlideOver";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel" });
@@ -22,11 +25,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${cinzel.variable} font-sans antialiased`}>
-        <SRDInitializer />
-        {children}
-        <DiceBox />
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SRDInitializer />
+          {children}
+          <DiceBox />
+          <Toaster />
+          <GlobalCommand />
+          <WikiSlideOver />
+        </ThemeProvider>
       </body>
-    </html>
+    </html >
   );
 }

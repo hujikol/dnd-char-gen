@@ -1,4 +1,4 @@
-import { db, CharacterDB, RaceDB, ClassDB, BackgroundDB } from './schema';
+import { db, CharacterDB, RaceDB, ClassDB, BackgroundDB, SpellDB, EquipmentDB, ConditionDB } from './schema';
 
 export const getAllCharacters = async (): Promise<CharacterDB[]> => {
   return await db.characters.toArray();
@@ -32,4 +32,16 @@ export const getAllClasses = async (): Promise<ClassDB[]> => {
 
 export const getAllBackgrounds = async (): Promise<BackgroundDB[]> => {
   return await db.backgrounds.toArray();
+};
+
+export const getAllSpells = async (): Promise<SpellDB[]> => {
+  return await db.spells.toArray();
+};
+
+export const getAllEquipment = async (): Promise<EquipmentDB[]> => {
+  return await db.equipment.toArray();
+};
+
+export const getAllConditions = async (): Promise<ConditionDB[]> => {
+  return await db.conditions.toArray();
 };

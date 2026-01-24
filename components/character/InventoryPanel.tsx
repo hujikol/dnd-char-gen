@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Minus, Trash2, Package, Scale, Sparkles, Link as LinkIcon } from 'lucide-react';
+import { WikiLink } from '@/components/wiki/WikiLink';
 
 interface InventoryPanelProps {
     inventory: InventoryItem[];
@@ -186,7 +187,9 @@ export function InventoryPanel({ inventory, currency, strengthScore, onUpdate, o
                         <CardContent className="p-3 flex items-center justify-between">
                             <div className="flex-1 min-w-0 mr-4">
                                 <div className="font-medium truncate text-slate-200 flex items-center gap-2">
-                                    {item.name}
+                                    <WikiLink type="equipment" entity={item.name} className="no-underline hover:underline cursor-pointer">
+                                        {item.name}
+                                    </WikiLink>
                                     {item.isMagic && <Sparkles className="w-3 h-3 text-purple-400" />}
                                 </div>
                                 <div className="flex gap-1">
