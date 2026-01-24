@@ -14,7 +14,7 @@ import { SavingThrowList } from './SavingThrowList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { RollHistoryList } from '../dice/RollHistoryList';
-import { History } from 'lucide-react';
+import { History, Download, Share2 } from 'lucide-react';
 import { InitiativeTracker } from '../combat/InitiativeTracker';
 import { SpellSlotTracker } from '../spells/SpellSlotTracker';
 import { SpellList } from '../spells/SpellList';
@@ -22,6 +22,9 @@ import { LongRestButton } from './RestButtons';
 import { ShortRestDialog } from './ShortRestDialog';
 import { Character } from '@/lib/stores/useCharacterStore';
 import { InventoryPanel } from './InventoryPanel';
+import { exportCharacterToJSON } from '@/lib/utils/export-character';
+import { generateShareUrl } from '@/lib/utils/share-character';
+import { toast } from "sonner";
 
 interface CharacterSheetProps {
     id: number;
@@ -88,6 +91,28 @@ export function CharacterSheet({ id }: CharacterSheetProps) {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => exportCharacterToJSON(character.data as Character)}
+                        title="Export JSON"
+                    >
+                        <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                            const url = generateShareUrl(character.data as Character);
+                            if (url) {
+                                navigator.clipboard.writeText(url);
+                                toast.success("Share link copied to clipboard!");
+                            }
+                        }}
+                        title="Share via Link"
+                    >
+                        <Share2 className="h-4 w-4" />
+                    </Button>
                     <ShortRestDialog
                         character={character.data as Character}
                         onUpdate={handleUpdate}

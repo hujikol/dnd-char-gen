@@ -6,6 +6,9 @@ import { Plus } from 'lucide-react';
 import { db } from '@/lib/db/schema';
 import { CharacterCard } from '@/components/character/CharacterCard';
 import { Button } from '@/components/ui/button';
+import { ImportCharacterButton } from '@/components/dashboard/ImportCharacterButton';
+import { bulkExportCharacters } from '@/lib/utils/export-character';
+import { Download } from 'lucide-react';
 
 export default function DashboardPage() {
     const characters = useLiveQuery(() => db.characters.toArray());
@@ -14,12 +17,24 @@ export default function DashboardPage() {
         <div className="container mx-auto p-4 md:p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-heading font-bold text-foreground">My Characters</h1>
-                <Link href="/character/new">
-                    <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        New Character
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={bulkExportCharacters}
+                        className="gap-2"
+                        title="Backup all characters to JSON"
+                    >
+                        <Download className="h-4 w-4" />
+                        Backup
                     </Button>
-                </Link>
+                    <ImportCharacterButton />
+                    <Link href="/character/new">
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            New Character
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {!characters ? (

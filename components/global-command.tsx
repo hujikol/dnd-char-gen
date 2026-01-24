@@ -16,10 +16,15 @@ import {
     Backpack,
     Scroll,
     Sun,
-    Moon
+    Moon,
+    Download
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/db/schema";
+import { exportCharacterToJSON } from "@/lib/utils/export-character";
+import { Character } from "@/lib/stores/useCharacterStore";
 
 import {
     CommandDialog,
@@ -35,7 +40,14 @@ import {
 export function GlobalCommand() {
     const [open, setOpen] = React.useState(false);
     const router = useRouter();
+    const params = useParams();
     const { setTheme, theme } = useTheme();
+
+    const characterId = params?.id ? parseInt(Array.isArray(params.id) ? params.id[0] : params.id) : undefined;
+    const character = useLiveQuery(
+        () => (characterId ? db.characters.get(characterId) : undefined),
+        [characterId]
+    );
 
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -78,6 +90,14 @@ export function GlobalCommand() {
                             <Plus className="mr-2 h-4 w-4" />
                             <span>New Character</span>
                         </CommandItem>
+                        {character && (
+                            <CommandItem
+                                onSelect={() => runCommand(() => exportCharacterToJSON(character.data as Character))}
+                            >
+                                <Download className="mr-2 h-4 w-4" />
+                                <span>Export {character.name} to JSON</span>
+                            </CommandItem>
+                        )}
                     </CommandGroup>
                     <CommandGroup heading="Quick Access (Future)">
                         <CommandItem disabled>
@@ -113,13 +133,11 @@ export function GlobalCommand() {
                             <Moon className="mr-2 h-4 w-4 hidden dark:inline" />
                             <span>Toggle Theme</span>
                         </CommandItem>
-                        <CommandItem disabled>
-                            <User className="mr-2 h-4 w-4" />
-                            <span>Profile</span>
-                        </CommandItem>
-                        <CommandItem disabled>
+                        <CommandItem
+                            onSelect={() => runCommand(() => router.push("/settings/data"))}
+                        >
                             <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
+                            <span>Data Management</span>
                         </CommandItem>
                     </CommandGroup>
                 </CommandList>
