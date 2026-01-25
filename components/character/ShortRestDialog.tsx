@@ -28,9 +28,10 @@ export function ShortRestDialog({ character, onUpdate }: ShortRestDialogProps) {
     const [diceToSpend, setDiceToSpend] = useState<number>(0);
 
     // Safely parse die type (e.g., "d8" -> 8)
-    const dieType = parseInt(character.hitDice.die.replace('d', '')) || 8;
-    const conMod = calculateModifier(character.abilityScores.con || 10);
-    const maxDice = character.hitDice.current;
+    const dieType = parseInt(character?.hitDice?.die?.replace('d', '') || "8") || 8;
+    const conMod = calculateModifier(character?.abilityScores?.con || 10);
+    const maxDice = character?.hitDice?.current || 0;
+
 
     const handleShortRest = () => {
         let hpRecovered = 0;

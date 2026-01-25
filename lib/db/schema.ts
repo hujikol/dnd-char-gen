@@ -1,5 +1,7 @@
 import Dexie, { Table } from 'dexie';
 
+
+
 export interface CharacterDB {
   id?: number;
   name: string;

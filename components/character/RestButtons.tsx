@@ -17,9 +17,10 @@ export function LongRestButton({ characterData, onUpdate }: LongRestButtonProps)
         // For a PWA, a simple confirm is okay, but a custom dialog is better. 
         // I'll stick to logic execution first.
 
-        const hpMax = characterData.hp.max;
-        const hitDiceMax = characterData.hitDice.max;
-        const currentHitDice = characterData.hitDice.current;
+        const hpMax = characterData?.hp?.max || 10;
+        const hitDiceMax = characterData?.hitDice?.max || 1;
+        const currentHitDice = characterData?.hitDice?.current || 0;
+
 
         // Recover half of total hit dice, min 1
         // Note: hitDiceMax is usually equal to Level. If multi-class, it sum of hit dice.

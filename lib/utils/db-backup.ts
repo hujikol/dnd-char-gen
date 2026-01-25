@@ -1,10 +1,10 @@
 import { db } from "@/lib/db/schema";
 import { toast } from "sonner";
-import 'dexie-export-import';
 
 export async function exportFullDatabase() {
   try {
-    const blob = await db.export();
+    const { exportDB } = await import("dexie-export-import");
+    const blob = await exportDB(db);
     const url = URL.createObjectURL(blob);
     
     const date = new Date().toISOString().split('T')[0];
@@ -27,16 +27,18 @@ export async function exportFullDatabase() {
 
 export async function importFullDatabase(file: File) {
   try {
-    await db.import(file, {
+    const { importInto } = await import("dexie-export-import");
+    await importInto(db, file, {
       overwriteValues: true,
-      clearTables: false // Keep existing data if no conflict? Or clear? 
-                        // Full restore usually implies overwriting or clearing. 
-                        // Let's safe default: don't clear, just upsert.
+      clearTablesBeforeImport: false 
     });
+
     toast.success("Database restored successfully!");
-    window.location.reload(); // Reload to reflect changes
+    window.location.reload(); 
   } catch (error) {
     console.error("Import failed:", error);
     toast.error("Failed to restore database.");
   }
 }
+
+

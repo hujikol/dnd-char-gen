@@ -1,7 +1,7 @@
 import { db } from "@/lib/db/schema";
 import { toast } from "sonner";
 import { CharacterSchema, CharacterInput } from "@/lib/validation/character-schema";
-import { ZodError } from "zod";
+
 
 export async function addCharacterToLibrary(data: any): Promise<number> {
     // Zod Schema Validation
@@ -9,10 +9,10 @@ export async function addCharacterToLibrary(data: any): Promise<number> {
 
     if (!validationResult.success) {
         // Extract meaningful error messages
-        const error = validationResult.error as ZodError;
-        const errors = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
+        const errors = validationResult.error.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
         throw new Error(`Invalid character data: ${errors}`);
     }
+
 
     const validData = validationResult.data;
 

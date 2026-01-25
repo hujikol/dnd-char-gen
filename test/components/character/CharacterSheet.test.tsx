@@ -30,8 +30,13 @@ describe('CharacterSheet', () => {
             data: {
                 race: "Dwarf",
                 background: "Soldier",
-                abilityScores: { str: 16, dex: 12, con: 14, int: 8, wis: 10, cha: 8 }
+                abilityScores: { str: 16, dex: 12, con: 14, int: 8, wis: 10, cha: 8 },
+                hitDice: { current: 3, max: 3, die: "d10" },
+                hp: { current: 30, max: 30, temp: 0 },
+                inventory: [],
+                currency: { gp: 0, sp: 0, cp: 0, ep: 0, pp: 0 }
             }
+
         };
 
         (DexieHooks.useLiveQuery as any).mockReturnValue(mockChar);
@@ -44,8 +49,9 @@ describe('CharacterSheet', () => {
         expect(screen.getByText(/Soldier/)).toBeInTheDocument();
 
         // Ability Scores rendering
-        expect(screen.getByText("16")).toBeInTheDocument(); // STR
-        expect(screen.getByText("+3")).toBeInTheDocument(); // STR Mod
+        expect(screen.getAllByText("16")[0]).toBeInTheDocument(); // STR
+        expect(screen.getAllByText("+3")[0]).toBeInTheDocument(); // STR Mod
+
     });
 
     it('displays not found message if character is null', () => {
